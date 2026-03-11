@@ -32,7 +32,7 @@ DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/crud_task
 Create a migration:
 
 ```bash
-alembic revision --autogenerate -m "create users table"
+alembic revision --autogenerate -m "create tasks table"
 ```
 
 Apply migrations:
