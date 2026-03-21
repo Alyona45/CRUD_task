@@ -1,46 +1,32 @@
-from typing import List
-
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.models.task import Task
+from fastapi import Depends, HTTPException, status
+from app.models.user import User
+from app.repositories.task_repository import TaskRepository
 from app.schemas.task import TaskCreate, TaskUpdate
 
 
-def create_task(db: Session, task_data: TaskCreate) -> Task:
-    task = Task(**task_data.model_dump())
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-    return task
+class TaskService:
+    def __init__(self, task_repository: TaskRepository = Depends()):
+        self.task_repository = task_repository
 
+    def create_task(self, current_user: User, task_data: TaskCreate):
+        return self.task_repository.create(current_user.id, task_data)
 
-def get_tasks(db: Session) -> List[Task]:
-    return db.query(Task).all()
+    def get_tasks(self, current_user: User):
+        return self.task_repository.get_all_by_owner(current_user.id)
 
+    def get_task_by_id(self, current_user: User, task_id: int):
+        task = self.task_repository.get_by_id_for_owner(task_id, current_user.id)
+        if task is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+        return task
 
-def get_task_by_id(db: Session, task_id: int) -> Task:
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if task is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found",
-        )
-    return task
+    def update_task(self, current_user: User, task_id: int, task_data: TaskUpdate):
+        task = self.get_task_by_id(current_user, task_id)
+        return self.task_repository.update(task, task_data)
 
-
-def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> Task:
-    task = get_task_by_id(db, task_id)
-
-    for field, value in task_data.model_dump(exclude_unset=True).items():
-        setattr(task, field, value)
-
-    db.commit()
-    db.refresh(task)
-    return task
-
-
-def delete_task(db: Session, task_id: int) -> None:
-    task = get_task_by_id(db, task_id)
-    db.delete(task)
-    db.commit()
+    def delete_task(self, current_user: User, task_id: int) -> None:
+        task = self.get_task_by_id(current_user, task_id)
+        self.task_repository.delete(task)

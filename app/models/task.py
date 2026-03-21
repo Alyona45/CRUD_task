@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 
 from app.models import Base
 
@@ -10,3 +10,4 @@ class Task(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     is_done = Column(Boolean, nullable=False, default=False)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)

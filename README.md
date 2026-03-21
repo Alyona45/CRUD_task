@@ -13,10 +13,10 @@ Minimal FastAPI backend with CRUD operations for tasks.
 ## Run
 
 ```bash
-pip install -r requirements.txt
+./venv/bin/pip install -e .
 cp .env.example .env
-alembic upgrade head
-uvicorn app.main:app --reload
+./venv/bin/alembic upgrade head
+./venv/bin/uvicorn app.main:app --reload
 ```
 
 ## Environment
@@ -25,6 +25,8 @@ Set your PostgreSQL connection in `.env`:
 
 ```env
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/crud_task
+SECRET_KEY=replace-with-a-long-random-secret
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 ## Alembic
@@ -32,17 +34,19 @@ DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/crud_task
 Create a migration:
 
 ```bash
-alembic revision --autogenerate -m "create tasks table"
+./venv/bin/alembic revision --autogenerate -m "create tasks table"
 ```
 
 Apply migrations:
 
 ```bash
-alembic upgrade head
+./venv/bin/alembic upgrade head
 ```
 
 ## Endpoints
 
+- `POST /auth/register`
+- `POST /auth/login`
 - `POST /tasks`
 - `GET /tasks`
 - `GET /tasks/{task_id}`

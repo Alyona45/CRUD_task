@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.models import Base
 from app.models.task import Task
+from app.models.user import User
 from app.settings import DATABASE_URL
 
 

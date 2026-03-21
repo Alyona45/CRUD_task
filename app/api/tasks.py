@@ -1,47 +1,57 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy.orm import Session
 
-from app.models import get_db
+from app.core.auth import get_current_user
+from app.models.user import User
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
-from app.services.task_service import (
-    create_task,
-    delete_task,
-    get_task_by_id,
-    get_tasks,
-    update_task,
-)
+from app.services.task_service import TaskService
 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
-def create_task_endpoint(task_data: TaskCreate, db: Session = Depends(get_db)) -> TaskResponse:
-    return create_task(db, task_data)
+def create_task_endpoint(
+    task_data: TaskCreate,
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(),
+) -> TaskResponse:
+    return service.create_task(current_user, task_data)
 
 
 @router.get("", response_model=List[TaskResponse])
-def get_tasks_endpoint(db: Session = Depends(get_db)) -> List[TaskResponse]:
-    return get_tasks(db)
+def get_tasks_endpoint(
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(),
+) -> List[TaskResponse]:
+    return service.get_tasks(current_user)
 
 
 @router.get("/{task_id}", response_model=TaskResponse)
-def get_task_endpoint(task_id: int, db: Session = Depends(get_db)) -> TaskResponse:
-    return get_task_by_id(db, task_id)
+def get_task_endpoint(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(),
+) -> TaskResponse:
+    return service.get_task_by_id(current_user, task_id)
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
 def update_task_endpoint(
     task_id: int,
     task_data: TaskUpdate,
-    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(),
 ) -> TaskResponse:
-    return update_task(db, task_id, task_data)
+    return service.update_task(current_user, task_id, task_data)
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task_endpoint(task_id: int, db: Session = Depends(get_db)) -> Response:
-    delete_task(db, task_id)
+def delete_task_endpoint(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    service: TaskService = Depends(),
+) -> Response:
+    service.delete_task(current_user, task_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
