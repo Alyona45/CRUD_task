@@ -1,4 +1,6 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
+
+from app.core.exceptions import TaskNotFound
 from app.models.user import User
 from app.repositories.task_repository import TaskRepository
 from app.schemas.task import TaskCreate, TaskUpdate
@@ -17,10 +19,7 @@ class TaskService:
     def get_task_by_id(self, current_user: User, task_id: int):
         task = self.task_repository.get_by_id_for_owner(task_id, current_user.id)
         if task is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Task not found",
-            )
+            raise TaskNotFound()
         return task
 
     def update_task(self, current_user: User, task_id: int, task_data: TaskUpdate):

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TaskBase(BaseModel):
@@ -34,8 +34,7 @@ class TaskUpdate(BaseModel):
 
 
 class TaskResponse(TaskBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     owner_id: int | None = None
-
-    class Config:
-        from_attributes = True

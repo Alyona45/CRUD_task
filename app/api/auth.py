@@ -4,7 +4,7 @@ from app.schemas.user import TokenResponse, UserLogin, UserRead, UserRegister
 from app.services.user_service import UserService
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)

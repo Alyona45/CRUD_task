@@ -1,6 +1,6 @@
 # CRUD Task
 
-Minimal FastAPI backend with CRUD operations for tasks.
+Minimal FastAPI backend with CRUD operations for tasks and comments.
 
 ## Stack
 
@@ -9,6 +9,7 @@ Minimal FastAPI backend with CRUD operations for tasks.
 - Pydantic
 - Alembic
 - PostgreSQL
+- Pytest
 
 ## Run
 
@@ -17,6 +18,13 @@ Minimal FastAPI backend with CRUD operations for tasks.
 cp .env.example .env
 ./venv/bin/alembic upgrade head
 ./venv/bin/uvicorn app.main:app --reload
+```
+
+## Tests
+
+```bash
+./venv/bin/pip install -e .[dev]
+./venv/bin/pytest
 ```
 
 ## Environment
@@ -45,10 +53,12 @@ Apply migrations:
 
 ## Endpoints
 
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /tasks`
-- `GET /tasks`
-- `GET /tasks/{task_id}`
-- `PATCH /tasks/{task_id}`
-- `DELETE /tasks/{task_id}`
+- `POST /v1/auth/register`
+- `POST /v1/auth/login`
+- `POST /v1/tasks`
+- `GET /v1/tasks`
+- `GET /v1/tasks/{task_id}`
+- `PATCH /v1/tasks/{task_id}`
+- `DELETE /v1/tasks/{task_id}`
+- `POST /v1/tasks/{task_id}/comments`
+- `GET /v1/tasks/{task_id}/comments`
