@@ -10,8 +10,10 @@ from app.models.user import User
 from app.settings import DATABASE_URL
 
 
+ALEMBIC_DATABASE_URL = DATABASE_URL.replace("+asyncpg", "+psycopg", 1)
+
 config = context.config
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", ALEMBIC_DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

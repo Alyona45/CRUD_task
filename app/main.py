@@ -1,13 +1,23 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.auth import router as auth_router
 from app.api.comments import router as comments_router
+from app.api.system import router as system_router
 from app.api.tasks import router as tasks_router
 from app.core.exceptions import AppError
 
 
 app = FastAPI(title="Task Manager API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(AppError)
@@ -26,3 +36,4 @@ def app_error_handler(_: Request, exc: AppError) -> JSONResponse:
 app.include_router(auth_router)
 app.include_router(tasks_router)
 app.include_router(comments_router)
+app.include_router(system_router)

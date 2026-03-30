@@ -9,7 +9,7 @@ from app.repositories.user_repository import UserRepository
 security = HTTPBearer()
 
 
-def get_current_user(
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     user_repository: UserRepository = Depends(),
 ) -> User:
@@ -27,7 +27,7 @@ def get_current_user(
             detail="Could not validate credentials",
         )
 
-    user = user_repository.get_by_username(username)
+    user = await user_repository.get_by_username(username)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

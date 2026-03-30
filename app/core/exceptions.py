@@ -22,3 +22,9 @@ class CommentNotFound(AppError):
     status_code = status.HTTP_404_NOT_FOUND
     code = "COMMENT_NOT_FOUND"
     message = "Comment not found"
+
+
+class TaskAvatarNotFound(AppError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "TASK_AVATAR_NOT_FOUND"
+    message = "Task avatar not found"

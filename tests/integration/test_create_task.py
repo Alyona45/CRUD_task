@@ -1,6 +1,8 @@
 from collections.abc import Callable
 
-from sqlalchemy.orm import Session
+import pytest
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.task import Task
 from app.models.user import User
@@ -9,16 +11,20 @@ from app.schemas.task import TaskCreate
 from app.services.task_service import TaskService
 
 
-def test_create_task_persists_task_in_database(db_session_factory: Callable[[], Session]):
-    with db_session_factory() as db_session:
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("reset_database")
+async def test_create_task_persists_task_in_database(
+    db_session_factory: Callable[[], AsyncSession],
+):
+    async with db_session_factory() as db_session:
         user = User(
             username="task_owner",
             email="task_owner@example.com",
             hashed_password="not-used-in-this-test",
         )
         db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
+        await db_session.commit()
+        await db_session.refresh(user)
 
         service = TaskService(task_repository=TaskRepository(db=db_session))
         task_data = TaskCreate(
@@ -27,7 +33,7 @@ def test_create_task_persists_task_in_database(db_session_factory: Callable[[], 
             is_done=False,
         )
 
-        created_task = service.create_task(user, task_data)
+        created_task = await service.create_task(user, task_data)
 
         assert created_task.id == 1
         assert created_task.title == "Write integration test"
@@ -35,8 +41,9 @@ def test_create_task_persists_task_in_database(db_session_factory: Callable[[], 
         assert created_task.is_done is False
         assert created_task.owner_id == user.id
 
-    with db_session_factory() as db_session:
-        stored_task = db_session.query(Task).filter(Task.id == 1).one()
+    async with db_session_factory() as db_session:
+        result = await db_session.execute(select(Task).where(Task.id == 1))
+        stored_task = result.scalar_one()
         assert stored_task.title == "Write integration test"
         assert stored_task.description == "Cover task creation flow"
         assert stored_task.is_done is False

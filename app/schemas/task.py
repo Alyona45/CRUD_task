@@ -38,3 +38,8 @@ class TaskResponse(TaskBase):
 
     id: int
     owner_id: int | None = None
+    avatar_url: str | None = None
+
+
+class TaskAvatarResponse(BaseModel):
+    url: str

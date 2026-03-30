@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
-from sqlalchemy.orm import Session
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
 from app.repositories.comment_repository import CommentRepository
@@ -11,16 +12,20 @@ from app.services.comment_service import CommentService
 from app.services.task_service import TaskService
 
 
-def test_create_and_get_comments_for_task(db_session_factory: Callable[[], Session]):
-    with db_session_factory() as db_session:
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("reset_database")
+async def test_create_and_get_comments_for_task(
+    db_session_factory: Callable[[], AsyncSession],
+):
+    async with db_session_factory() as db_session:
         user = User(
             username="comment_owner",
             email="comment_owner@example.com",
             hashed_password="not-used-in-this-test",
         )
         db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
+        await db_session.commit()
+        await db_session.refresh(user)
 
         task_service = TaskService(task_repository=TaskRepository(db=db_session))
         comment_service = CommentService(
@@ -28,7 +33,7 @@ def test_create_and_get_comments_for_task(db_session_factory: Callable[[], Sessi
             task_repository=TaskRepository(db=db_session),
         )
 
-        task = task_service.create_task(
+        task = await task_service.create_task(
             user,
             TaskCreate(
                 title="Task with comments",
@@ -37,12 +42,12 @@ def test_create_and_get_comments_for_task(db_session_factory: Callable[[], Sessi
             ),
         )
 
-        created_comment = comment_service.create_comment(
+        created_comment = await comment_service.create_comment(
             user,
             task.id,
             CommentCreate(content="First comment"),
         )
-        comments = comment_service.get_comments(user, task.id)
+        comments = await comment_service.get_comments(user, task.id)
 
         assert created_comment.id == 1
         assert created_comment.content == "First comment"

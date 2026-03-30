@@ -11,6 +11,7 @@ class Task(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     is_done = Column(Boolean, nullable=False, default=False)
+    avatar_url = Column(String(1024), nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
 
     owner = relationship("User", back_populates="tasks")
